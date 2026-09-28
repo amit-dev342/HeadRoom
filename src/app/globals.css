@@ -5,3 +5,5 @@
 
 .dateField{position:relative;margin-bottom:11px}.dateField input[type="date"]{margin-bottom:0!important;padding-left:15px!important;padding-right:16px!important}.datePlaceholder{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#808080;font-size:inherit;pointer-events:none}.dateField:not(.hasValue) input[type="date"]{color:transparent}.dateField input[type="date"]::-webkit-calendar-picker-indicator{margin:0;padding:0;width:20px;height:20px}
 .radios{align-items:center}.radios label,.filterChoices label{display:inline-flex;align-items:center;gap:7px;line-height:1}.radios input[type="radio"],.filterChoices input[type="radio"]{margin:0;width:16px;height:16px;flex:0 0 16px;accent-color:#8c7cff}.filterChoices{display:flex;gap:22px;align-items:center;padding:5px 2px 16px}.filterChoices label{font-size:14px;color:#f6f4ff}
+
+.dateField{cursor:pointer}.dateField input[type="date"]{cursor:pointer}.dateField:not(.hasValue) input[type="date"]::-webkit-datetime-edit{color:transparent}.dateField:not(.hasValue) input[type="date"]::-webkit-datetime-edit-fields-wrapper{visibility:hidden}.dateField .datePlaceholder{z-index:1}
