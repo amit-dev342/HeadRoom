@@ -1,1 +1,15 @@
-export const dynamic = "force-static";\nimport type {MetadataRoute} from "next";export default function manifest():MetadataRoute.Manifest{return{name:"HeadRoom",short_name:"HeadRoom",description:"Make space. Move forward.",start_url:"/",display:"standalone",background_color:"#111526",theme_color:"#111526"}}
+import type { MetadataRoute } from "next";
+
+export const dynamic = "force-static";
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "HeadRoom",
+    short_name: "HeadRoom",
+    description: "Make space. Move forward.",
+    start_url: "/",
+    display: "standalone",
+    background_color: "#111526",
+    theme_color: "#111526",
+  };
+}
