@@ -6,6 +6,7 @@
     android:background="@drawable/widget_bg">
 
     <LinearLayout
+        android:id="@+id/widgetHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
