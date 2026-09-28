@@ -1,12 +1,12 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
-import {displayDate,loadTasks,PREF_KEY,Priority,saveTasks,Task,TaskSize,TaskStyle,weekLabel,weekStart} from "@/lib/tasks";
+import {displayDate,loadTasks,PREF_KEY,Priority,saveTasks,Task,TaskSize,TaskStyle,weekLabel,weekStart} from "@/lib/tasks";import {syncWidgetTasks} from "@/lib/widgetBridge";
 type Draft={text:string;due:string;tag:string;notes:string;priority:Priority};
 const blank:Draft={text:"",due:"",tag:"",notes:"",priority:"medium"};
 export default function HeadRoom(){
  const [tasks,setTasks]=useState<Task[]>([]),[ready,setReady]=useState(false),[draft,setDraft]=useState<Draft>(blank),[editing,setEditing]=useState<Task|null>(null),[modal,setModal]=useState(false),[viewOpen,setViewOpen]=useState(false),[size,setSize]=useState<TaskSize>("default"),[style,setStyle]=useState<TaskStyle>("card"),[collapsed,setCollapsed]=useState<Record<string,boolean>>({});
  useEffect(()=>{setTasks(loadTasks());try{const p=JSON.parse(localStorage.getItem(PREF_KEY)||"{}");if(p.size)setSize(p.size);if(p.style)setStyle(p.style);setCollapsed(p.collapsed||{})}catch{}setReady(true)},[]);
- useEffect(()=>{if(ready)saveTasks(tasks)},[tasks,ready]);useEffect(()=>{if(ready)localStorage.setItem(PREF_KEY,JSON.stringify({size,style,collapsed}))},[size,style,collapsed,ready]);
+ useEffect(()=>{if(ready){saveTasks(tasks);void syncWidgetTasks(tasks)}},[tasks,ready]);useEffect(()=>{if(ready)localStorage.setItem(PREF_KEY,JSON.stringify({size,style,collapsed}))},[size,style,collapsed,ready]);
  const sorted=useMemo(()=>[...tasks].sort((a,b)=>weekStart(a)-weekStart(b)||Number(a.done)-Number(b.done)),[tasks]);
  const groups=useMemo(()=>{const m=new Map<number,Task[]>();sorted.forEach(t=>{const k=weekStart(t);m.set(k,[...(m.get(k)||[]),t])});return [...m.entries()]},[sorted]);
  const active=tasks.filter(t=>!t.done).length;
