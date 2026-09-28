@@ -49,6 +49,26 @@ final class WidgetTaskStore {
         return count;
     }
 
+    static int missedCount(Context context) {
+        JSONArray tasks = readTasks(context);
+        String today = new java.text.SimpleDateFormat(
+                "yyyy-MM-dd",
+                java.util.Locale.US
+        ).format(new java.util.Date());
+
+        int count = 0;
+        for (int i = 0; i < tasks.length(); i++) {
+            JSONObject task = tasks.optJSONObject(i);
+            if (task == null || task.optBoolean("done", false)) continue;
+
+            String due = task.optString("due", "");
+            if (!due.isEmpty() && due.compareTo(today) < 0) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     static void save(Context context, String tasksJson, long updatedAt) throws Exception {
         JSONArray validated = new JSONArray(tasksJson);
         preferences(context)
