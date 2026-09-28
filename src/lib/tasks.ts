@@ -1,7 +1,0 @@
-export type Priority="high"|"medium"|"low";export type Task={id:number;text:string;priority:Priority;done:boolean;due:string;tag:string;notes:string};export type TaskSize="compact"|"default"|"expanded";export type TaskStyle="card"|"list"|"board";
-export const STORAGE_KEY="headroom.tasks";export const PREF_KEY="headroom.preferences";
-export const loadTasks=():Task[]=>{if(typeof window==="undefined")return[];try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]")}catch{return[]}};
-export const saveTasks=(tasks:Task[])=>localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks));
-export const weekStart=(task:Task)=>{const date=task.due?new Date(task.due+"T00:00:00"):new Date();const day=date.getDay();date.setDate(date.getDate()-(day===0?6:day-1));date.setHours(0,0,0,0);return date.getTime()};
-export const weekLabel=(start:number)=>{const a=new Date(start),b=new Date(start);b.setDate(a.getDate()+6);const f=(d:Date)=>d.toLocaleDateString(undefined,{day:"numeric",month:"short"});return a.getFullYear()===b.getFullYear()?f(a)+" – "+f(b)+" "+b.getFullYear():f(a)+" "+a.getFullYear()+" – "+f(b)+" "+b.getFullYear()};
-export const displayDate=(value:string)=>value?new Date(value+"T00:00:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"}):"";

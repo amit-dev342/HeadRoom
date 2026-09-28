@@ -1,32 +1,188 @@
 "use client";
-import {useEffect,useMemo,useRef,useState} from "react";
-import {displayDate,loadTasks,PREF_KEY,Priority,saveTasks,Task,weekLabel,weekStart} from "@/lib/tasks";import {syncWidgetTasks} from "@/lib/widgetBridge";
-type Draft={text:string;due:string;tag:string;notes:string;priority:Priority};
-const blank:Draft={text:"",due:"",tag:"",notes:"",priority:"medium"};
-export default function HeadRoom(){
- const dateInputRef=useRef<HTMLInputElement>(null);
- const today=new Date().toLocaleDateString("en-CA");
- const [tasks,setTasks]=useState<Task[]>([]),[ready,setReady]=useState(false),[draft,setDraft]=useState<Draft>(blank),[editing,setEditing]=useState<Task|null>(null),[modal,setModal]=useState(false),[filterOpen,setFilterOpen]=useState(false),[filterMode,setFilterMode]=useState<"week"|"tag">("week"),[collapsed,setCollapsed]=useState<Record<string,boolean>>({});
- useEffect(()=>{setTasks(loadTasks());try{const p=JSON.parse(localStorage.getItem(PREF_KEY)||"{}");if(p.filterMode==="tag")setFilterMode("tag");setCollapsed(p.collapsed||{})}catch{}setReady(true)},[]);
- useEffect(()=>{if(ready){saveTasks(tasks);void syncWidgetTasks(tasks)}},[tasks,ready]);useEffect(()=>{if(ready)localStorage.setItem(PREF_KEY,JSON.stringify({collapsed,filterMode}))},[collapsed,filterMode,ready]);
- const sorted=useMemo(()=>[...tasks].sort((a,b)=>weekStart(a)-weekStart(b)||Number(a.done)-Number(b.done)),[tasks]);
- const weekGroups=useMemo(()=>{const m=new Map<number,Task[]>();sorted.forEach(t=>{const k=weekStart(t);m.set(k,[...(m.get(k)||[]),t])});return [...m.entries()]},[sorted]);
- const tagGroups=useMemo(()=>{const m=new Map<string,{label:string;items:Task[]}>();sorted.forEach(t=>{const label=t.tag.trim()||"Untagged";const key=label.toLocaleLowerCase();const current=m.get(key);if(current)current.items.push(t);else m.set(key,{label,items:[t]})});return [...m.values()].sort((a,b)=>a.label.localeCompare(b.label))},[sorted]);
- const active=tasks.filter(t=>!t.done).length;
- const openAdd=()=>{setEditing(null);setDraft(blank);setModal(true)};const openEdit=(t:Task)=>{setEditing(t);setDraft({text:t.text,due:t.due,tag:t.tag,notes:t.notes,priority:t.priority});setModal(true)};
- const submit=()=>{if(!draft.text.trim())return;if(editing)setTasks(x=>x.map(t=>t.id===editing.id?{...t,...draft,text:draft.text.trim()}:t));else setTasks(x=>[...x,{id:Date.now(),...draft,text:draft.text.trim(),done:false}]);setModal(false)};
- const remove=(id:number)=>{if(confirm("Delete this task?"))setTasks(x=>x.filter(t=>t.id!==id));setModal(false)};
- const toggle=(id:number)=>setTasks(x=>x.map(t=>t.id===id?{...t,done:!t.done}:t));
- const Card=({task}:{task:Task})=><article className={`task ${task.priority} ${task.done?"done":""} expanded card`} >
-   <button className="check" onClick={()=>toggle(task.id)} aria-label={task.done?"Mark active":"Mark complete"}>{task.done?"✓":""}</button><div className="taskBody"><strong className="taskTitle">{task.text}</strong>{<div className="chips">{task.due&&<span>{displayDate(task.due)}</span>}{task.tag&&<span>{task.tag}</span>}<span>{task.priority.toUpperCase()}</span></div>}{task.notes&&<p>{task.notes}</p>}</div><button className="more" onClick={()=>openEdit(task)} aria-label="Edit task">⋮</button>
- </article>;
- const Board=()=> <div className="board">{(["high","medium","low"] as Priority[]).map(p=>{const items=sorted.filter(t=>t.priority===p);return items.length?<section className="lane" key={p}><h2>{p.toUpperCase()} PRIORITY <span>{items.length}</span></h2>{items.map(t=><Card key={t.id} task={t}/>)}</section>:null})}</div>;
- if(!ready)return null;
- return <main><header><div><div className="brand">HEADROOM</div><p>MAKE SPACE. MOVE FORWARD.</p></div><button className="view" onClick={()=>setFilterOpen(true)}>FILTER</button></header>
- <div className="sectionTitle"><h1>MY TASKS</h1><span>{active} ACTIVE</span></div>
- {sorted.length===0?<div className="empty"><b>✓</b><h2>Nothing pending</h2><p>Your space is clear. Add something when it matters.</p></div>:<div className="weeks">{filterMode==="week"?weekGroups.map(([start,items])=>{const key=`week-${start}`;const closed=collapsed[key];return <section className="week" key={key}><button className="weekHead" onClick={()=>setCollapsed(x=>({...x,[key]:!closed}))}><span className="weekLabel"><svg className={`chevron ${closed?"":"open"}`} viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19L16 12L9 5"/></svg><span>{weekLabel(start)}</span></span><span>{items.length}</span></button>{!closed&&<div className="weekBody">{items.map(t=><Card key={t.id} task={t}/>)}</div>}</section>}):tagGroups.map(group=>{const key=`tag-${group.label.toLocaleLowerCase()}`;const closed=collapsed[key];return <section className="week" key={key}><button className="weekHead" onClick={()=>setCollapsed(x=>({...x,[key]:!closed}))}><span className="weekLabel"><svg className={`chevron ${closed?"":"open"}`} viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19L16 12L9 5"/></svg><span>{group.label}</span></span><span>{group.items.length}</span></button>{!closed&&<div className="weekBody">{group.items.map(t=><Card key={t.id} task={t}/>)}</div>}</section>})}</div>}
- <button className="fab" onClick={openAdd} aria-label="Add task">+</button>
- {modal&&<div className="overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(false)}}><div className="dialog"><h2>{editing?"Edit task":"New task"}</h2><input autoFocus placeholder="Task title" value={draft.text} onChange={e=>setDraft({...draft,text:e.target.value})}/><div className={`dateField ${draft.due?"hasValue":""}`} onClick={()=>dateInputRef.current?.showPicker()}><input ref={dateInputRef} type="date" aria-label="Due date" min={today} value={draft.due} onChange={e=>setDraft({...draft,due:e.target.value})}/>{!draft.due&&<span className="datePlaceholder">Due date</span>}</div><input placeholder="Tag (e.g. Personal)" value={draft.tag} onChange={e=>setDraft({...draft,tag:e.target.value})}/><textarea placeholder="Notes (optional)" value={draft.notes} onChange={e=>setDraft({...draft,notes:e.target.value})}/><div className="radios">{(["high","medium","low"] as Priority[]).map(p=><label key={p}><input type="radio" name="priority" checked={draft.priority===p} onChange={()=>setDraft({...draft,priority:p})}/>{p[0].toUpperCase()+p.slice(1)}</label>)}</div><div className="actions">{editing&&<button className="danger" onClick={()=>remove(editing.id)}>DELETE</button>}<span/><button onClick={()=>setModal(false)}>CANCEL</button><button className="primary" onClick={submit}>{editing?"SAVE":"ADD"}</button></div></div></div>}
- {filterOpen&&<div className="overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setFilterOpen(false)}}><div className="dialog"><h2>Group tasks by</h2><div className="filterChoices"><label><input type="radio" name="grouping" checked={filterMode==="week"} onChange={()=>setFilterMode("week")}/><span>Weekly</span></label><label><input type="radio" name="grouping" checked={filterMode==="tag"} onChange={()=>setFilterMode("tag")}/><span>Tag</span></label></div><div className="actions"><span/><button className="primary" onClick={()=>setFilterOpen(false)}>APPLY</button></div></div></div>}
- </main>;
+
+import { useEffect, useMemo, useState } from "react";
+import GroupingDialog from "./GroupingDialog";
+import TaskCard from "./TaskCard";
+import TaskEditorDialog from "./TaskEditorDialog";
+import TaskSection from "./TaskSection";
+import {
+  readPreferences,
+  writePreferences,
+} from "@/features/tasks/taskRepository";
+import {
+  groupTasksByTag,
+  groupTasksByWeek,
+  weekLabel,
+} from "@/features/tasks/taskUtils";
+import type {
+  GroupingMode,
+  Task,
+  TaskDraft,
+} from "@/features/tasks/types";
+import { useTasks } from "@/features/tasks/useTasks";
+
+export default function HeadRoom() {
+  const {
+    tasks,
+    ready,
+    addTask,
+    updateTask,
+    deleteTask,
+    toggleTask,
+  } = useTasks();
+
+  const [groupingMode, setGroupingMode] = useState<GroupingMode>("week");
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  useEffect(() => {
+    const preferences = readPreferences();
+    setGroupingMode(preferences.groupingMode);
+    setCollapsed(preferences.collapsed);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    writePreferences({ groupingMode, collapsed });
+  }, [collapsed, groupingMode, ready]);
+
+  const weekGroups = useMemo(() => groupTasksByWeek(tasks), [tasks]);
+  const tagGroups = useMemo(() => groupTasksByTag(tasks), [tasks]);
+  const activeCount = tasks.filter((task) => !task.done).length;
+
+  function openNewTask() {
+    setEditingTask(null);
+    setEditorOpen(true);
+  }
+
+  function openEditTask(task: Task) {
+    setEditingTask(task);
+    setEditorOpen(true);
+  }
+
+  function closeEditor() {
+    setEditorOpen(false);
+    setEditingTask(null);
+  }
+
+  function saveTask(draft: TaskDraft) {
+    if (editingTask) {
+      updateTask(editingTask.id, draft);
+    } else {
+      addTask(draft);
+    }
+    closeEditor();
+  }
+
+  function removeEditingTask() {
+    if (!editingTask) return;
+    deleteTask(editingTask.id);
+    closeEditor();
+  }
+
+  function toggleSection(key: string) {
+    setCollapsed((current) => ({
+      ...current,
+      [key]: !current[key],
+    }));
+  }
+
+  if (!ready) return null;
+
+  return (
+    <main>
+      <header>
+        <div>
+          <div className="brand">HEADROOM</div>
+          <p>MAKE SPACE. MOVE FORWARD.</p>
+        </div>
+        <button className="view" onClick={() => setFilterOpen(true)}>
+          FILTER
+        </button>
+      </header>
+
+      <div className="sectionTitle">
+        <h1>MY TASKS</h1>
+        <span>{activeCount} ACTIVE</span>
+      </div>
+
+      {tasks.length === 0 ? (
+        <div className="empty">
+          <b>✓</b>
+          <h2>Nothing pending</h2>
+          <p>Your space is clear. Add something when it matters.</p>
+        </div>
+      ) : (
+        <div className="weeks">
+          {groupingMode === "week"
+            ? weekGroups.map(([start, items]) => {
+                const key = `week-${start}`;
+                return (
+                  <TaskSection
+                    key={key}
+                    label={weekLabel(start)}
+                    count={items.length}
+                    collapsed={Boolean(collapsed[key])}
+                    onToggle={() => toggleSection(key)}
+                  >
+                    {items.map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onToggle={toggleTask}
+                        onEdit={openEditTask}
+                      />
+                    ))}
+                  </TaskSection>
+                );
+              })
+            : tagGroups.map((group) => {
+                const key = `tag-${group.label.toLocaleLowerCase()}`;
+                return (
+                  <TaskSection
+                    key={key}
+                    label={group.label}
+                    count={group.items.length}
+                    collapsed={Boolean(collapsed[key])}
+                    onToggle={() => toggleSection(key)}
+                  >
+                    {group.items.map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onToggle={toggleTask}
+                        onEdit={openEditTask}
+                      />
+                    ))}
+                  </TaskSection>
+                );
+              })}
+        </div>
+      )}
+
+      <button className="fab" onClick={openNewTask} aria-label="Add task">
+        +
+      </button>
+
+      {editorOpen && (
+        <TaskEditorDialog
+          key={editingTask?.id ?? "new-task"}
+          task={editingTask}
+          onSave={saveTask}
+          onDelete={editingTask ? removeEditingTask : undefined}
+          onClose={closeEditor}
+        />
+      )}
+
+      {filterOpen && (
+        <GroupingDialog
+          mode={groupingMode}
+          onChange={setGroupingMode}
+          onClose={() => setFilterOpen(false)}
+        />
+      )}
+    </main>
+  );
 }
