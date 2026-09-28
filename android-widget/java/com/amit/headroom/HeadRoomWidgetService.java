@@ -115,7 +115,9 @@ public class HeadRoomWidgetService extends RemoteViewsService {
         private RemoteViews buildAddTaskCard() {
             RemoteViews views = new RemoteViews(
                     context.getPackageName(),
-                    R.layout.headroom_widget_add_task
+                    compact
+                            ? R.layout.headroom_widget_add_task_compact
+                            : R.layout.headroom_widget_add_task
             );
 
             Intent addTask = new Intent();
@@ -134,7 +136,7 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
         @Override
         public int getViewTypeCount() {
-            return 3;
+            return 2;
         }
 
         @Override
