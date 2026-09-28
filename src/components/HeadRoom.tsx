@@ -20,6 +20,7 @@ import type {
   TaskDraft,
 } from "@/features/tasks/types";
 import { useTasks } from "@/features/tasks/useTasks";
+import { consumeWidgetAddTaskRequest } from "@/features/tasks/widgetGateway";
 
 export default function HeadRoom() {
   const {
@@ -47,6 +48,27 @@ export default function HeadRoom() {
     if (!ready) return;
     writePreferences({ groupingMode, collapsed });
   }, [collapsed, groupingMode, ready]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function openRequestedTaskEditor() {
+      const requested = await consumeWidgetAddTaskRequest();
+      if (!cancelled && requested) {
+        setEditingTask(null);
+        setEditorOpen(true);
+      }
+    }
+
+    void openRequestedTaskEditor();
+    window.addEventListener("focus", openRequestedTaskEditor);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", openRequestedTaskEditor);
+    };
+  }, []);
+
 
   const weekGroups = useMemo(() => groupTasksByWeek(tasks), [tasks]);
   const tagGroups = useMemo(() => groupTasksByTag(tasks), [tasks]);
