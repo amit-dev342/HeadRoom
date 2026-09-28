@@ -160,6 +160,7 @@ export default function HeadRoom() {
                         task={task}
                         onToggle={toggleTask}
                         onEdit={openEditTask}
+                      onDelete={deleteTask}
                       />
                     ))}
                   </TaskSection>
@@ -181,6 +182,7 @@ export default function HeadRoom() {
                         task={task}
                         onToggle={toggleTask}
                         onEdit={openEditTask}
+                      onDelete={deleteTask}
                       />
                     ))}
                   </TaskSection>
@@ -200,6 +202,7 @@ export default function HeadRoom() {
                   task={task}
                   onToggle={toggleTask}
                   onEdit={openEditTask}
+                onDelete={deleteTask}
                 />
               ))}
             </TaskSection>
