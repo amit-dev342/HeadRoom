@@ -13,22 +13,26 @@ import org.json.JSONObject;
 
 public class HeadRoomWidgetService extends RemoteViewsService {
     static final String EXTRA_COMPACT = "compact";
+    static final String EXTRA_SHOW_METADATA = "showMetadata";
     private static final int MAX_TASKS_BEFORE_ADD_CARD = 3;
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
         boolean compact = intent.getBooleanExtra(EXTRA_COMPACT, false);
-        return new Factory(getApplicationContext(), compact);
+        boolean showMetadata = intent.getBooleanExtra(EXTRA_SHOW_METADATA, false);
+        return new Factory(getApplicationContext(), compact, showMetadata);
     }
 
     private static final class Factory implements RemoteViewsFactory {
         private final Context context;
         private final boolean compact;
+        private final boolean showMetadata;
         private JSONArray tasks = new JSONArray();
 
-        Factory(Context context, boolean compact) {
+        Factory(Context context, boolean compact, boolean showMetadata) {
             this.context = context;
             this.compact = compact;
+            this.showMetadata = showMetadata;
         }
 
         @Override
@@ -91,14 +95,21 @@ public class HeadRoomWidgetService extends RemoteViewsService {
             );
 
             if (!compact) {
-                String due = task.optString("due", "");
-                String tag = task.optString("tag", "").trim();
-
-                views.setTextViewText(R.id.taskDue, dueLabel(due));
-                views.setTextViewText(
-                        R.id.taskTag,
-                        tag.isEmpty() ? "UNTAGGED" : tag.toUpperCase(Locale.ROOT)
+                views.setViewVisibility(
+                        R.id.taskMetadataRow,
+                        showMetadata ? android.view.View.VISIBLE : android.view.View.GONE
                 );
+
+                if (showMetadata) {
+                    String due = task.optString("due", "");
+                    String tag = task.optString("tag", "").trim();
+
+                    views.setTextViewText(R.id.taskDue, dueLabel(due));
+                    views.setTextViewText(
+                            R.id.taskTag,
+                            tag.isEmpty() ? "UNTAGGED" : tag.toUpperCase(Locale.ROOT)
+                    );
+                }
             }
 
             Intent cardTap = new Intent();
