@@ -9,6 +9,7 @@ interface NativeTaskSnapshot {
 interface HeadRoomWidgetPlugin {
   syncTasks(input: { tasks: string; updatedAt: string }): Promise<{ count: number; updatedAt: string }>;
   getTaskSnapshot(): Promise<NativeTaskSnapshot>;
+  consumeAddTaskRequest(): Promise<{ requested: boolean }>;
 }
 
 const HeadRoomWidget = registerPlugin<HeadRoomWidgetPlugin>("HeadRoomWidget");
@@ -45,5 +46,17 @@ export async function readWidgetSnapshot(): Promise<TaskSnapshot | null> {
     };
   } catch {
     return null;
+  }
+}
+
+
+export async function consumeWidgetAddTaskRequest() {
+  if (!Capacitor.isNativePlatform()) return false;
+
+  try {
+    const result = await HeadRoomWidget.consumeAddTaskRequest();
+    return Boolean(result.requested);
+  } catch {
+    return false;
   }
 }
