@@ -42,13 +42,6 @@ public class HeadRoomWidgetPlugin extends Plugin {
     }
 
     private void refreshWidgets() {
-        AppWidgetManager manager = AppWidgetManager.getInstance(getContext());
-        ComponentName provider = new ComponentName(getContext(), HeadRoomWidget.class);
-        int[] widgetIds = manager.getAppWidgetIds(provider);
-
-        manager.notifyAppWidgetViewDataChanged(widgetIds, R.id.widgetList);
-        for (int widgetId : widgetIds) {
-            HeadRoomWidget.update(getContext(), manager, widgetId);
-        }
+        HeadRoomWidget.refreshData(getContext());
     }
 }
