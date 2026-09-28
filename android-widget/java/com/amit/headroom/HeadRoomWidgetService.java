@@ -33,6 +33,7 @@ public class HeadRoomWidgetService extends RemoteViewsService {
         private final int displayMode;
         private final boolean compact;
         private JSONArray tasks = new JSONArray();
+        private int missedCount = 0;
 
         Factory(Context context, int displayMode, boolean compact) {
             this.context = context;
@@ -55,7 +56,7 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
         @Override
         public int getCount() {
-            return tasks.length() + 2;
+            return tasks.length() + 1 + (hasMissedCard() ? 1 : 0);
         }
 
         @Override
@@ -63,7 +64,7 @@ public class HeadRoomWidgetService extends RemoteViewsService {
             if (position == addCardPosition()) {
                 return buildAddTaskCard();
             }
-            if (position == missedCardPosition()) {
+            if (hasMissedCard() && position == missedCardPosition()) {
                 return buildMissedCard();
             }
 
@@ -78,15 +79,15 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
         private int taskIndexForPosition(int position) {
             int addPosition = addCardPosition();
-            int missedPosition = missedCardPosition();
 
-            if (position < addPosition) {
-                return position;
-            }
-            if (position > missedPosition) {
-                return position - 2;
-            }
-            return -1;
+            if (position == addPosition) return -1;
+            if (hasMissedCard() && position == missedCardPosition()) return -1;
+
+            int offset = 0;
+            if (position > addPosition) offset++;
+            if (hasMissedCard() && position > missedCardPosition()) offset++;
+
+            return position - offset;
         }
 
         private RemoteViews buildTaskCard(JSONObject task) {
@@ -187,7 +188,7 @@ public class HeadRoomWidgetService extends RemoteViewsService {
             );
             views.setTextViewText(
                     R.id.missedCount,
-                    "Missed: " + WidgetTaskStore.missedCount(context)
+                    "Missed: " + missedCount
             );
             return views;
         }
@@ -207,7 +208,7 @@ public class HeadRoomWidgetService extends RemoteViewsService {
             if (position == addCardPosition()) {
                 return Long.MAX_VALUE;
             }
-            if (position == missedCardPosition()) {
+            if (hasMissedCard() && position == missedCardPosition()) {
                 return Long.MAX_VALUE - 1;
             }
 
@@ -223,14 +224,19 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
         private void reload() {
             tasks = WidgetTaskStore.readTasks(context);
+            missedCount = WidgetTaskStore.missedCount(context);
         }
 
         private int addCardPosition() {
             return Math.min(MAX_TASKS_BEFORE_ADD_CARD, tasks.length());
         }
 
+        private boolean hasMissedCard() {
+            return missedCount > 0;
+        }
+
         private int missedCardPosition() {
-            return addCardPosition() + 1;
+            return hasMissedCard() ? addCardPosition() + 1 : -1;
         }
 
         private int backgroundFor(boolean done, String priority) {
