@@ -80,3 +80,26 @@ export function groupTasksByTag(tasks: Task[]) {
 
   return [...groups.values()].sort((a, b) => a.label.localeCompare(b.label));
 }
+
+
+export function isTaskMissed(task: Task, today = toLocalIsoDate()) {
+  return Boolean(task.due) && !task.done && task.due < today;
+}
+
+export function splitMissedTasks(tasks: Task[]) {
+  const today = toLocalIsoDate();
+  const current: Task[] = [];
+  const missed: Task[] = [];
+
+  tasks.forEach((task) => {
+    if (isTaskMissed(task, today)) {
+      missed.push(task);
+    } else {
+      current.push(task);
+    }
+  });
+
+  missed.sort((a, b) => a.due.localeCompare(b.due) || a.id - b.id);
+
+  return { current, missed };
+}
