@@ -2,6 +2,8 @@
     android:id="@+id/taskCard"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:minWidth="300dp"
+    android:minHeight="220dp"
     android:orientation="vertical"
     android:padding="20dp"
     android:background="@drawable/widget_card">
@@ -49,7 +51,8 @@
         android:id="@+id/taskWeek"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#FFF7E8"
+        android:textColor="#F6E9C9"
+        android:alpha=".82"
         android:textSize="12sp"
         android:paddingTop="8dp" />
 
@@ -65,7 +68,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="#FFFFFF"
+            android:textColor="#F6E9C9"
+            android:alpha=".82"
             android:textStyle="bold"
             android:textSize="13sp" />
 
@@ -73,7 +77,9 @@
             android:id="@+id/taskTag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
+            android:maxWidth="120dp"
+            android:textColor="#F6E9C9"
+            android:alpha=".82"
             android:textStyle="bold"
             android:textSize="12sp"
             android:maxLines="1"
@@ -86,7 +92,8 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:text="No notes"
-        android:textColor="#FFF7E8"
+        android:textColor="#F6E9C9"
+        android:alpha=".74"
         android:textSize="13sp"
         android:maxLines="2"
         android:ellipsize="end"
