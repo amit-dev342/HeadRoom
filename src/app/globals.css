@@ -1,9 +1,432 @@
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#111526;color:#f6f4ff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}body{background:radial-gradient(circle at 90% 0,#24234a 0,transparent 32rem),#111526}main{max-width:760px;margin:auto;min-height:100vh;padding:max(28px,env(safe-area-inset-top)) 20px 100px}header{display:flex;align-items:center;justify-content:space-between;padding:12px 2px 28px}.brand{font-weight:900;font-size:27px;letter-spacing:.12em}header p{margin:5px 0 0;color:#7f89a8;font-size:10px;font-weight:800;letter-spacing:.15em}.view{border:1px solid #343d5f;background:#1c2238;color:#bfc5dc;border-radius:14px;padding:11px 14px;font-size:11px;font-weight:800;letter-spacing:.1em}.sectionTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.sectionTitle h1{font-size:13px;letter-spacing:.14em;margin:0}.sectionTitle span{font-size:10px;color:#8c7cff;font-weight:900;letter-spacing:.1em}.week{margin-bottom:18px}.weekHead{width:100%;border:1px solid #343d5f;background:linear-gradient(135deg,#1c2238,#242c47);color:#bfc5dc;border-radius:17px;padding:14px 17px;display:flex;justify-content:space-between;font-size:12px;font-weight:800;box-shadow:0 8px 18px #07091455}.weekBody{padding-top:11px}.task{display:flex;align-items:center;gap:10px;border-radius:22px;padding:18px;margin-bottom:12px;box-shadow:0 12px 24px #06081266,inset 0 1px #ffffff40;border:1px solid #ffffff30;transition:.18s transform,.18s opacity}.task:active{transform:scale(.98)}.task.high{background:linear-gradient(135deg,#d43a50,#f06a3c)}.task.medium{background:linear-gradient(135deg,#d28a17,#e9b72f)}.task.low{background:linear-gradient(135deg,#148c72,#23b39c)}.task.done{background:linear-gradient(135deg,#424a69,#303750)}.task.compact{padding:13px 15px}.task.expanded{padding:21px}.task.list{border-radius:12px;margin-bottom:5px;box-shadow:0 3px 8px #06081255}.check{width:35px;height:35px;flex:0 0 35px;border:2px solid #fff;border-radius:50%;background:#ffffff18;color:white;font-weight:900}.taskBody{min-width:0;flex:1}.taskTitle{display:block;font-size:18px;overflow-wrap:anywhere}.compact .taskTitle{font-size:16px}.done .taskTitle{text-decoration:line-through;opacity:.55}.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.chips span{background:#ffffff1f;border:1px solid #ffffff24;padding:4px 8px;border-radius:999px;font-size:9px;font-weight:800}.taskBody p{margin:10px 0 0;font-size:13px;opacity:.75;white-space:pre-wrap}.more{border:0;background:transparent;color:white;font-size:26px;width:38px;height:42px}.board{display:grid;gap:18px}.lane h2{font-size:11px;letter-spacing:.1em;color:#bfc5dc;padding-left:5px}.lane h2 span{color:#7f89a8}.empty{text-align:center;padding:110px 20px;color:#7f89a8}.empty b{font-size:34px;color:#8c7cff}.empty h2{color:#f6f4ff;margin:12px 0 5px}.empty p{font-size:13px}.fab{position:fixed;right:max(24px,calc((100vw - 760px)/2 + 24px));bottom:max(26px,env(safe-area-inset-bottom));width:62px;height:62px;border:0;border-radius:21px;background:linear-gradient(135deg,#7c68ff,#aa6dff);color:white;font-size:34px;box-shadow:0 15px 30px #6d55ff55}.overlay{position:fixed;inset:0;background:#050713bb;display:flex;align-items:flex-end;justify-content:center;z-index:10;padding:20px}.dialog{width:min(100%,520px);background:linear-gradient(145deg,#1c2238,#171c30);border:1px solid #343d5f;border-radius:26px;padding:22px;box-shadow:0 30px 80px #000a}.dialog h2{margin:0 0 20px}.dialog input:not([type=radio]),.dialog textarea,.dialog select{width:100%;border:1px solid #343d5f;background:#111526;color:#f6f4ff;border-radius:14px;padding:15px;margin-bottom:11px;outline:none}.dialog textarea{min-height:88px;resize:vertical}.radios{display:flex;gap:15px;padding:7px 2px 15px;flex-wrap:wrap}.radios label{font-size:13px}.actions{display:flex;align-items:center;gap:7px;margin-top:8px}.actions span{flex:1}.actions button{border:0;background:transparent;color:#bfc5dc;padding:11px;font-weight:800;font-size:11px}.actions .primary{color:#a99dff}.actions .danger{color:#ff7d85}.fieldLabel{display:block;color:#7f89a8;font-size:10px;font-weight:900;letter-spacing:.12em;margin:14px 0}.fieldLabel select{margin-top:7px}@media(min-width:760px){.board{grid-template-columns:repeat(3,1fr);align-items:start}.board .task{align-items:flex-start}.board .chips{display:none}.board .taskTitle{font-size:15px}}
-.weekLabel{display:flex;align-items:center;gap:8px}.chevron{width:15px;height:15px;flex:0 0 15px;display:block;transition:transform .18s ease}.chevron path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.chevron.open{transform:rotate(90deg)}
+:root {
+  --bg: #111526;
+  --surface: #1c2238;
+  --surface-strong: #242c47;
+  --border: #343d5f;
+  --text: #f6f4ff;
+  --text-secondary: #bfc5dc;
+  --text-muted: #7f89a8;
+  --accent: #8c7cff;
+  --danger: #ff7d85;
+  --high-start: #d43a50;
+  --high-end: #f06a3c;
+  --medium-start: #d28a17;
+  --medium-end: #e9b72f;
+  --low-start: #148c72;
+  --low-end: #23b39c;
+  --done-start: #424a69;
+  --done-end: #303750;
+}
 
-.dialog input[type="date"]{color:#7f89a8;color-scheme:dark}.dialog input[type="date"]:valid{color:#f6f4ff}.dialog input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(83%) sepia(9%) saturate(568%) hue-rotate(191deg) brightness(92%);opacity:.85;cursor:pointer}
+* {
+  box-sizing: border-box;
+}
 
-.dateField{position:relative;margin-bottom:11px}.dateField input[type="date"]{margin-bottom:0!important;padding-left:15px!important;padding-right:16px!important}.datePlaceholder{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#808080;font-size:inherit;pointer-events:none}.dateField:not(.hasValue) input[type="date"]{color:transparent}.dateField input[type="date"]::-webkit-calendar-picker-indicator{margin:0;padding:0;width:20px;height:20px}
-.radios{align-items:center}.radios label,.filterChoices label{display:inline-flex;align-items:center;gap:7px;line-height:1}.radios input[type="radio"],.filterChoices input[type="radio"]{margin:0;width:16px;height:16px;flex:0 0 16px;accent-color:#8c7cff}.filterChoices{display:flex;gap:22px;align-items:center;padding:5px 2px 16px}.filterChoices label{font-size:14px;color:#f6f4ff}
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
 
-.dateField{cursor:pointer}.dateField input[type="date"]{cursor:pointer}.dateField:not(.hasValue) input[type="date"]::-webkit-datetime-edit{color:transparent}.dateField:not(.hasValue) input[type="date"]::-webkit-datetime-edit-fields-wrapper{visibility:hidden}.dateField .datePlaceholder{z-index:1}
+body {
+  background: radial-gradient(circle at 90% 0, #24234a 0, transparent 32rem), var(--bg);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+main {
+  max-width: 760px;
+  min-height: 100vh;
+  margin: auto;
+  padding: max(28px, env(safe-area-inset-top)) 20px 100px;
+}
+
+header,
+.sectionTitle,
+.weekHead,
+.actions,
+.radios,
+.filterChoices {
+  display: flex;
+  align-items: center;
+}
+
+header {
+  justify-content: space-between;
+  padding: 12px 2px 28px;
+}
+
+.brand {
+  font-size: 27px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+header p {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .15em;
+}
+
+.view {
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+
+.sectionTitle {
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sectionTitle h1 {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: .14em;
+}
+
+.sectionTitle span {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+
+.week {
+  margin-bottom: 18px;
+}
+
+.weekHead {
+  width: 100%;
+  justify-content: space-between;
+  padding: 14px 17px;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background: linear-gradient(135deg, var(--surface), var(--surface-strong));
+  box-shadow: 0 8px 18px #07091455;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.weekBody {
+  padding-top: 11px;
+}
+
+.weekLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chevron {
+  display: block;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  transition: transform .18s ease;
+}
+
+.chevron path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chevron.open {
+  transform: rotate(90deg);
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 21px;
+  border: 1px solid #ffffff30;
+  border-radius: 22px;
+  box-shadow: 0 12px 24px #06081266, inset 0 1px #ffffff40;
+  transition: transform .18s ease, opacity .18s ease;
+}
+
+.task:active {
+  transform: scale(.98);
+}
+
+.task.high {
+  background: linear-gradient(135deg, var(--high-start), var(--high-end));
+}
+
+.task.medium {
+  background: linear-gradient(135deg, var(--medium-start), var(--medium-end));
+}
+
+.task.low {
+  background: linear-gradient(135deg, var(--low-start), var(--low-end));
+}
+
+.task.done {
+  background: linear-gradient(135deg, var(--done-start), var(--done-end));
+}
+
+.check {
+  width: 35px;
+  height: 35px;
+  flex: 0 0 35px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #ffffff18;
+  color: #fff;
+  font-weight: 900;
+}
+
+.taskBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.taskTitle {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 18px;
+}
+
+.done .taskTitle {
+  opacity: .55;
+  text-decoration: line-through;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.chips span {
+  padding: 4px 8px;
+  border: 1px solid #ffffff24;
+  border-radius: 999px;
+  background: #ffffff1f;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.taskBody p {
+  margin: 10px 0 0;
+  opacity: .75;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.more {
+  width: 38px;
+  height: 42px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 26px;
+}
+
+.empty {
+  padding: 110px 20px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.empty b {
+  color: var(--accent);
+  font-size: 34px;
+}
+
+.empty h2 {
+  margin: 12px 0 5px;
+  color: var(--text);
+}
+
+.empty p {
+  font-size: 13px;
+}
+
+.fab {
+  position: fixed;
+  right: max(24px, calc((100vw - 760px) / 2 + 24px));
+  bottom: max(26px, env(safe-area-inset-bottom));
+  width: 62px;
+  height: 62px;
+  border: 0;
+  border-radius: 21px;
+  background: linear-gradient(135deg, #7c68ff, #aa6dff);
+  box-shadow: 0 15px 30px #6d55ff55;
+  color: #fff;
+  font-size: 34px;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 20px;
+  background: #050713bb;
+}
+
+.dialog {
+  width: min(100%, 520px);
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  background: linear-gradient(145deg, var(--surface), #171c30);
+  box-shadow: 0 30px 80px #000a;
+}
+
+.dialog h2 {
+  margin: 0 0 20px;
+}
+
+.dialog input:not([type="radio"]),
+.dialog textarea,
+.dialog select {
+  width: 100%;
+  margin-bottom: 11px;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  outline: none;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.dialog textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.dateField {
+  position: relative;
+  margin-bottom: 11px;
+  cursor: pointer;
+}
+
+.dateField input[type="date"] {
+  margin-bottom: 0 !important;
+  padding-right: 16px !important;
+  padding-left: 15px !important;
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+.dateField:not(.hasValue) input[type="date"] {
+  color: transparent;
+}
+
+.dateField:not(.hasValue) input[type="date"]::-webkit-datetime-edit,
+.dateField:not(.hasValue) input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  visibility: hidden;
+}
+
+.dateField input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  opacity: .85;
+  filter: invert(83%) sepia(9%) saturate(568%) hue-rotate(191deg) brightness(92%);
+  cursor: pointer;
+}
+
+.datePlaceholder {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  z-index: 1;
+  transform: translateY(-50%);
+  color: #808080;
+  pointer-events: none;
+}
+
+.radios {
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 7px 2px 15px;
+}
+
+.radios label,
+.filterChoices label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  line-height: 1;
+}
+
+.radios label {
+  font-size: 13px;
+}
+
+.radios input[type="radio"],
+.filterChoices input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex: 0 0 16px;
+  accent-color: var(--accent);
+}
+
+.filterChoices {
+  gap: 22px;
+  padding: 5px 2px 16px;
+}
+
+.filterChoices label {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.actions {
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.actions span {
+  flex: 1;
+}
+
+.actions button {
+  padding: 11px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.actions .primary {
+  color: #a99dff;
+}
+
+.actions .danger {
+  color: var(--danger);
+}
