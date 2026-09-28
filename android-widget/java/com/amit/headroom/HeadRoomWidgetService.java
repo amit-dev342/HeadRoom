@@ -51,7 +51,7 @@ public class HeadRoomWidgetService extends RemoteViewsService {
     return applyCardBackground(v,bg);
    }catch(Exception e){return null;}
   }
-  private RemoteViews applyCardBackground(RemoteViews v,int bg){v.setInt(R.id.taskAction,"setBackgroundResource",R.drawable.widget_action);return v;}
+  private RemoteViews applyCardBackground(RemoteViews v,int bg){v.setInt(R.id.taskCard,"setBackgroundResource",bg);v.setInt(R.id.taskAction,"setBackgroundResource",R.drawable.widget_action);return v;}
   private String dueLabel(String due){if(due.isEmpty())return "NO DUE DATE";try{Date d=new SimpleDateFormat("yyyy-MM-dd",Locale.US).parse(due);return new SimpleDateFormat("EEE, d MMM",Locale.US).format(d);}catch(Exception e){return due;}}
   private String weekLabel(String due){if(due.isEmpty())return "No scheduled week";try{SimpleDateFormat iso=new SimpleDateFormat("yyyy-MM-dd",Locale.US);Date d=iso.parse(due);Calendar cal=Calendar.getInstance();cal.setTime(d);int day=(cal.get(Calendar.DAY_OF_WEEK)+5)%7;cal.add(Calendar.DATE,-day);Date start=cal.getTime();cal.add(Calendar.DATE,6);Date end=cal.getTime();return new SimpleDateFormat("d MMM",Locale.US).format(start)+" – "+new SimpleDateFormat("d MMM yyyy",Locale.US).format(end);}catch(Exception e){return "";}}
   private String dailyQuote(){try{BufferedReader r=new BufferedReader(new java.io.InputStreamReader(c.getResources().openRawResource(R.raw.motivational_quotes)));ArrayList<String> q=new ArrayList<>();String line;while((line=r.readLine())!=null)if(!line.trim().isEmpty())q.add(line);int day=Calendar.getInstance().get(Calendar.DAY_OF_YEAR);return q.get((day-1)%q.size());}catch(Exception e){return "Make room for what matters.";}}
