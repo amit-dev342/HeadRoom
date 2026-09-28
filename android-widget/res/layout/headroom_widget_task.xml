@@ -12,7 +12,6 @@
     android:background="@drawable/widget_card">
 
     <LinearLayout
-        android:id="@+id/taskMetadataRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -55,6 +54,7 @@
         android:ellipsize="end" />
 
     <LinearLayout
+        android:id="@+id/taskMetadataRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
