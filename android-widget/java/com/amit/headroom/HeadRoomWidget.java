@@ -82,8 +82,17 @@ public class HeadRoomWidget extends AppWidgetProvider {
 
     static void update(Context context, AppWidgetManager manager, int widgetId) {
         int widgetHeightDp = getWidgetHeightDp(context, manager, widgetId);
-        boolean compact = widgetHeightDp > 0 && widgetHeightDp < COMPACT_HEIGHT_DP;
-        boolean showMetadata = widgetHeightDp >= DETAILED_HEIGHT_DP;
+        int displayMode;
+        if (widgetHeightDp <= 0) {
+            displayMode = HeadRoomWidgetService.MODE_DETAILED;
+        } else if (widgetHeightDp < COMPACT_HEIGHT_DP) {
+            displayMode = HeadRoomWidgetService.MODE_COMPACT;
+        } else if (widgetHeightDp < DETAILED_HEIGHT_DP) {
+            displayMode = HeadRoomWidgetService.MODE_TITLE_ONLY;
+        } else {
+            displayMode = HeadRoomWidgetService.MODE_DETAILED;
+        }
+        boolean compact = displayMode == HeadRoomWidgetService.MODE_COMPACT;
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.headroom_widget);
 
         views.setViewVisibility(R.id.widgetHeader, compact ? View.GONE : View.VISIBLE);
@@ -109,8 +118,7 @@ public class HeadRoomWidget extends AppWidgetProvider {
                 "snapshotUpdatedAt",
                 WidgetTaskStore.readUpdatedAt(context)
         );
-        serviceIntent.putExtra(HeadRoomWidgetService.EXTRA_COMPACT, compact);
-        serviceIntent.putExtra(HeadRoomWidgetService.EXTRA_SHOW_METADATA, showMetadata);
+        serviceIntent.putExtra(HeadRoomWidgetService.EXTRA_DISPLAY_MODE, displayMode);
         serviceIntent.setData(Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME)));
 
         views.setRemoteAdapter(R.id.widgetList, serviceIntent);

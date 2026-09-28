@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/taskCard"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minWidth="300dp"
+    android:minHeight="160dp"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:paddingStart="24dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="16dp"
+    android:background="@drawable/widget_card">
+
+    <TextView
+        android:id="@+id/taskTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start|center_vertical"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="26sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+</LinearLayout>

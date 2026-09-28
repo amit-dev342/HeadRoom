@@ -12,27 +12,27 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class HeadRoomWidgetService extends RemoteViewsService {
-    static final String EXTRA_COMPACT = "compact";
-    static final String EXTRA_SHOW_METADATA = "showMetadata";
+    static final String EXTRA_DISPLAY_MODE = "displayMode";
+    static final int MODE_COMPACT = 0;
+    static final int MODE_TITLE_ONLY = 1;
+    static final int MODE_DETAILED = 2;
+
     private static final int MAX_TASKS_BEFORE_ADD_CARD = 3;
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        boolean compact = intent.getBooleanExtra(EXTRA_COMPACT, false);
-        boolean showMetadata = intent.getBooleanExtra(EXTRA_SHOW_METADATA, false);
-        return new Factory(getApplicationContext(), compact, showMetadata);
+        int displayMode = intent.getIntExtra(EXTRA_DISPLAY_MODE, MODE_DETAILED);
+        return new Factory(getApplicationContext(), displayMode);
     }
 
     private static final class Factory implements RemoteViewsFactory {
         private final Context context;
-        private final boolean compact;
-        private final boolean showMetadata;
+        private final int displayMode;
         private JSONArray tasks = new JSONArray();
 
-        Factory(Context context, boolean compact, boolean showMetadata) {
+        Factory(Context context, int displayMode) {
             this.context = context;
-            this.compact = compact;
-            this.showMetadata = showMetadata;
+            this.displayMode = displayMode;
         }
 
         @Override
@@ -76,44 +76,35 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
             RemoteViews views = new RemoteViews(
                     context.getPackageName(),
-                    compact
-                            ? R.layout.headroom_widget_task_compact
-                            : R.layout.headroom_widget_task
+                    taskLayout()
             );
 
             views.setInt(R.id.taskCard, "setBackgroundResource", backgroundFor(done, priority));
-            views.setTextViewText(R.id.taskStatus, done ? "COMPLETED" : "ACTIVE");
-            views.setTextViewText(
-                    R.id.taskPriority,
-                    priority.toUpperCase(Locale.ROOT) + " PRIORITY"
-            );
-            views.setTextViewText(R.id.taskTitle, task.optString("text", ""));
-            views.setInt(
-                    R.id.taskTitle,
-                    "setPaintFlags",
-                    done ? Paint.STRIKE_THRU_TEXT_FLAG : 0
-            );
 
-            if (!compact) {
-                views.setViewVisibility(
-                        R.id.taskDue,
-                        showMetadata ? android.view.View.VISIBLE : android.view.View.GONE
+            if (displayMode == MODE_COMPACT) {
+                views.setTextViewText(R.id.taskStatus, done ? "COMPLETED" : "ACTIVE");
+                views.setTextViewText(
+                        R.id.taskPriority,
+                        priority.toUpperCase(Locale.ROOT) + " PRIORITY"
                 );
-                views.setViewVisibility(
+            } else if (displayMode == MODE_TITLE_ONLY) {
+                setTaskTitle(views, task, done);
+            } else {
+                views.setTextViewText(R.id.taskStatus, done ? "COMPLETED" : "ACTIVE");
+                views.setTextViewText(
+                        R.id.taskPriority,
+                        priority.toUpperCase(Locale.ROOT) + " PRIORITY"
+                );
+                setTaskTitle(views, task, done);
+
+                String due = task.optString("due", "");
+                String tag = task.optString("tag", "").trim();
+
+                views.setTextViewText(R.id.taskDue, dueLabel(due));
+                views.setTextViewText(
                         R.id.taskTag,
-                        showMetadata ? android.view.View.VISIBLE : android.view.View.GONE
+                        tag.isEmpty() ? "UNTAGGED" : tag.toUpperCase(Locale.ROOT)
                 );
-
-                if (showMetadata) {
-                    String due = task.optString("due", "");
-                    String tag = task.optString("tag", "").trim();
-
-                    views.setTextViewText(R.id.taskDue, dueLabel(due));
-                    views.setTextViewText(
-                            R.id.taskTag,
-                            tag.isEmpty() ? "UNTAGGED" : tag.toUpperCase(Locale.ROOT)
-                    );
-                }
             }
 
             Intent cardTap = new Intent();
@@ -127,10 +118,29 @@ public class HeadRoomWidgetService extends RemoteViewsService {
             return views;
         }
 
+        private void setTaskTitle(RemoteViews views, JSONObject task, boolean done) {
+            views.setTextViewText(R.id.taskTitle, task.optString("text", ""));
+            views.setInt(
+                    R.id.taskTitle,
+                    "setPaintFlags",
+                    done ? Paint.STRIKE_THRU_TEXT_FLAG : 0
+            );
+        }
+
+        private int taskLayout() {
+            if (displayMode == MODE_COMPACT) {
+                return R.layout.headroom_widget_task_compact;
+            }
+            if (displayMode == MODE_TITLE_ONLY) {
+                return R.layout.headroom_widget_task_title_only;
+            }
+            return R.layout.headroom_widget_task;
+        }
+
         private RemoteViews buildAddTaskCard() {
             RemoteViews views = new RemoteViews(
                     context.getPackageName(),
-                    compact
+                    displayMode == MODE_COMPACT
                             ? R.layout.headroom_widget_add_task_compact
                             : R.layout.headroom_widget_add_task
             );
