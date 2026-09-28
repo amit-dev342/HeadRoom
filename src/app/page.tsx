@@ -1,0 +1,1 @@
+import HeadRoom from "@/components/HeadRoom";export default function Page(){return <HeadRoom/>;}
