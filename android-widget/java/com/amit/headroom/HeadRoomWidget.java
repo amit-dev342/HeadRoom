@@ -82,11 +82,16 @@ public class HeadRoomWidget extends AppWidgetProvider {
 
     static void update(Context context, AppWidgetManager manager, int widgetId) {
         int widgetHeightDp = getWidgetHeightDp(context, manager, widgetId);
-        int displayMode = widgetHeightDp > 0 && widgetHeightDp < COMPACT_HEIGHT_DP
-                ? HeadRoomWidgetService.MODE_COMPACT
-                : widgetHeightDp < DETAILED_HEIGHT_DP
-                        ? HeadRoomWidgetService.MODE_TITLE_ONLY
-                        : HeadRoomWidgetService.MODE_DETAILED;
+        int displayMode;
+        if (widgetHeightDp <= 0) {
+            displayMode = HeadRoomWidgetService.MODE_DETAILED;
+        } else if (widgetHeightDp < COMPACT_HEIGHT_DP) {
+            displayMode = HeadRoomWidgetService.MODE_COMPACT;
+        } else if (widgetHeightDp < DETAILED_HEIGHT_DP) {
+            displayMode = HeadRoomWidgetService.MODE_TITLE_ONLY;
+        } else {
+            displayMode = HeadRoomWidgetService.MODE_DETAILED;
+        }
         boolean compact = displayMode == HeadRoomWidgetService.MODE_COMPACT;
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.headroom_widget);
 
