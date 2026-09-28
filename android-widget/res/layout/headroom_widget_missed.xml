@@ -1,0 +1,35 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/missedCard"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minWidth="300dp"
+    android:minHeight="160dp"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingStart="22dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="22dp"
+    android:paddingBottom="16dp"
+    android:background="@drawable/widget_card_missed">
+
+    <ImageView
+        android:id="@+id/missedCat"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:src="@drawable/widget_cat"
+        android:contentDescription="Cat" />
+
+    <TextView
+        android:id="@+id/missedCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingTop="8dp"
+        android:text="Missed: 0"
+        android:textColor="#5B2E26"
+        android:textStyle="bold"
+        android:textSize="18sp" />
+</LinearLayout>

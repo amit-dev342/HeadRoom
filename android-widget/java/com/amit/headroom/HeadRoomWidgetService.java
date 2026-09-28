@@ -55,23 +55,38 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
         @Override
         public int getCount() {
-            return tasks.length() + 1;
+            return tasks.length() + 2;
         }
 
         @Override
         public RemoteViews getViewAt(int position) {
-            int addPosition = addCardPosition();
-            if (position == addPosition) {
+            if (position == addCardPosition()) {
                 return buildAddTaskCard();
             }
+            if (position == missedCardPosition()) {
+                return buildMissedCard();
+            }
 
-            int taskIndex = position < addPosition ? position : position - 1;
+            int taskIndex = taskIndexForPosition(position);
             if (taskIndex < 0 || taskIndex >= tasks.length()) return null;
 
             JSONObject task = tasks.optJSONObject(taskIndex);
             if (task == null) return null;
 
             return buildTaskCard(task);
+        }
+
+        private int taskIndexForPosition(int position) {
+            int addPosition = addCardPosition();
+            int missedPosition = missedCardPosition();
+
+            if (position < addPosition) {
+                return position;
+            }
+            if (position > missedPosition) {
+                return position - 2;
+            }
+            return -1;
         }
 
         private RemoteViews buildTaskCard(JSONObject task) {
@@ -163,6 +178,20 @@ public class HeadRoomWidgetService extends RemoteViewsService {
             return views;
         }
 
+        private RemoteViews buildMissedCard() {
+            RemoteViews views = new RemoteViews(
+                    context.getPackageName(),
+                    compact
+                            ? R.layout.headroom_widget_missed_compact
+                            : R.layout.headroom_widget_missed
+            );
+            views.setTextViewText(
+                    R.id.missedCount,
+                    "Missed: " + WidgetTaskStore.missedCount(context)
+            );
+            return views;
+        }
+
         @Override
         public RemoteViews getLoadingView() {
             return null;
@@ -170,7 +199,7 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
         @Override
         public int getViewTypeCount() {
-            return 2;
+            return 3;
         }
 
         @Override
@@ -178,8 +207,11 @@ public class HeadRoomWidgetService extends RemoteViewsService {
             if (position == addCardPosition()) {
                 return Long.MAX_VALUE;
             }
+            if (position == missedCardPosition()) {
+                return Long.MAX_VALUE - 1;
+            }
 
-            int taskIndex = position < addCardPosition() ? position : position - 1;
+            int taskIndex = taskIndexForPosition(position);
             JSONObject task = tasks.optJSONObject(taskIndex);
             return task == null ? position : task.optLong("id", position);
         }
@@ -195,6 +227,10 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
         private int addCardPosition() {
             return Math.min(MAX_TASKS_BEFORE_ADD_CARD, tasks.length());
+        }
+
+        private int missedCardPosition() {
+            return addCardPosition() + 1;
         }
 
         private int backgroundFor(boolean done, String priority) {
