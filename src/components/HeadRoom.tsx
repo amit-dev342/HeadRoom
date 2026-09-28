@@ -14,7 +14,7 @@ export default function HeadRoom(){
  const submit=()=>{if(!draft.text.trim())return;if(editing)setTasks(x=>x.map(t=>t.id===editing.id?{...t,...draft,text:draft.text.trim()}:t));else setTasks(x=>[...x,{id:Date.now(),...draft,text:draft.text.trim(),done:false}]);setModal(false)};
  const remove=(id:number)=>{if(confirm("Delete this task?"))setTasks(x=>x.filter(t=>t.id!==id));setModal(false)};
  const toggle=(id:number)=>setTasks(x=>x.map(t=>t.id===id?{...t,done:!t.done}:t));
- const Card=({task}:{task:Task})=><article className={`task ${task.priority} ${task.done?"done":""} ${size} ${style}`} onDoubleClick={()=>toggle(task.id)}>
+ const Card=({task}:{task:Task})=><article className={`task ${task.priority} ${task.done?"done":""} ${size} ${style}`} >
    <button className="check" onClick={()=>toggle(task.id)} aria-label={task.done?"Mark active":"Mark complete"}>{task.done?"✓":""}</button><div className="taskBody"><strong className="taskTitle">{task.text}</strong>{size!=="compact"&&<div className="chips">{task.due&&<span>{displayDate(task.due)}</span>}{task.tag&&<span>{task.tag}</span>}<span>{task.priority.toUpperCase()}</span></div>}{size==="expanded"&&task.notes&&<p>{task.notes}</p>}</div><button className="more" onClick={()=>openEdit(task)} aria-label="Edit task">⋮</button>
  </article>;
  const Board=()=> <div className="board">{(["high","medium","low"] as Priority[]).map(p=>{const items=sorted.filter(t=>t.priority===p);return items.length?<section className="lane" key={p}><h2>{p.toUpperCase()} PRIORITY <span>{items.length}</span></h2>{items.map(t=><Card key={t.id} task={t}/>)}</section>:null})}</div>;
