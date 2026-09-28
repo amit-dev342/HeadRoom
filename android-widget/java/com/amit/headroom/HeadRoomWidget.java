@@ -22,6 +22,7 @@ public class HeadRoomWidget extends AppWidgetProvider {
     static final String INTERACTION_ADD_TASK = "addTask";
 
     private static final int COMPACT_HEIGHT_DP = 150;
+    private static final int METADATA_HEIGHT_DP = 220;
     private static final long DOUBLE_TAP_WINDOW_MS = 550L;
     private static final String GESTURE_PREFS = "HeadRoomWidgetGestures";
     private static final String LAST_TAP_TASK_KEY = "lastTapTask";
@@ -80,17 +81,19 @@ public class HeadRoomWidget extends AppWidgetProvider {
     }
 
     static void update(Context context, AppWidgetManager manager, int widgetId) {
-        boolean compact = isCompact(context, manager, widgetId);
+        int widgetHeight = getWidgetHeightDp(context, manager, widgetId);
+        boolean compact = widgetHeight > 0 && widgetHeight < COMPACT_HEIGHT_DP;
+        boolean showMetadata = widgetHeight >= METADATA_HEIGHT_DP;
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.headroom_widget);
 
         views.setViewVisibility(R.id.widgetHeader, compact ? View.GONE : View.VISIBLE);
         views.setViewVisibility(R.id.widgetCounts, compact ? View.GONE : View.VISIBLE);
         views.setViewPadding(
                 R.id.widgetRoot,
-                dp(context, 4),
-                dp(context, 4),
-                dp(context, 4),
-                dp(context, 4)
+                dp(context, compact ? 4 : 8),
+                dp(context, compact ? 4 : 8),
+                dp(context, compact ? 4 : 8),
+                dp(context, compact ? 4 : 6)
         );
         views.setViewPadding(
                 R.id.widgetList,
@@ -107,6 +110,7 @@ public class HeadRoomWidget extends AppWidgetProvider {
                 WidgetTaskStore.readUpdatedAt(context)
         );
         serviceIntent.putExtra(HeadRoomWidgetService.EXTRA_COMPACT, compact);
+        serviceIntent.putExtra(HeadRoomWidgetService.EXTRA_SHOW_METADATA, showMetadata);
         serviceIntent.setData(Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME)));
 
         views.setRemoteAdapter(R.id.widgetList, serviceIntent);
@@ -142,7 +146,7 @@ public class HeadRoomWidget extends AppWidgetProvider {
         manager.updateAppWidget(widgetId, views);
     }
 
-    private static boolean isCompact(
+    private static int getWidgetHeightDp(
             Context context,
             AppWidgetManager manager,
             int widgetId
@@ -162,7 +166,7 @@ public class HeadRoomWidget extends AppWidgetProvider {
             height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0);
         }
 
-        return height > 0 && height < COMPACT_HEIGHT_DP;
+        return height;
     }
 
     private static boolean isDoubleTap(Context context, long taskId) {
