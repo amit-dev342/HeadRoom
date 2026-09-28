@@ -3,11 +3,12 @@ set -euo pipefail
 BASE="android/app/src/main"
 SRC="android-widget"
 PKG="$BASE/java/com/amit/headroom"
-mkdir -p "$PKG" "$BASE/res/xml" "$BASE/res/layout" "$BASE/res/drawable" "$BASE/res/raw"
+mkdir -p "$PKG" "$BASE/res/xml" "$BASE/res/layout" "$BASE/res/drawable" "$BASE/res/raw" "$BASE/res/raw"
 cp "$SRC"/java/com/amit/headroom/*.java "$PKG"/
 cp "$SRC"/res/xml/*.xml "$BASE/res/xml"/
 cp "$SRC"/res/layout/*.xml "$BASE/res/layout"/
 cp "$SRC"/res/drawable/*.xml "$BASE/res/drawable"/
+cp "$SRC"/res/raw/* "$BASE/res/raw"/
 cp "$SRC"/res/raw/* "$BASE/res/raw"/
 MANIFEST="$BASE/AndroidManifest.xml"
 python3 - "$MANIFEST" <<'PY'
