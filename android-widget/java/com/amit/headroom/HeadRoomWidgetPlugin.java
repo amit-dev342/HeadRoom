@@ -41,6 +41,13 @@ public class HeadRoomWidgetPlugin extends Plugin {
         call.resolve(result);
     }
 
+    @PluginMethod
+    public void consumeAddTaskRequest(PluginCall call) {
+        JSObject result = new JSObject();
+        result.put("requested", WidgetTaskStore.consumeAddTaskRequest(getContext()));
+        call.resolve(result);
+    }
+
     private void refreshWidgets() {
         HeadRoomWidget.refreshData(getContext());
     }
