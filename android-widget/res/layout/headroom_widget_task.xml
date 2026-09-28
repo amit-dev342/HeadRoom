@@ -3,7 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp"
+    android:paddingStart="24dp"
+    android:paddingTop="20dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="20dp"
     android:background="@drawable/widget_card">
 
     <LinearLayout
@@ -27,11 +30,13 @@
             android:id="@+id/taskPriority"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="end"
             android:text="MEDIUM PRIORITY"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:textSize="10sp"
-            android:letterSpacing=".08" />
+            android:letterSpacing=".08"
+            android:maxLines="1" />
     </LinearLayout>
 
     <TextView
@@ -50,8 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingBottom="14dp">
+        android:gravity="center_vertical">
 
         <TextView
             android:id="@+id/taskDue"
@@ -59,32 +63,26 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="#F6E9C9"
-            android:alpha=".74"
+            android:alpha=".70"
             android:textStyle="bold"
-            android:textSize="12sp" />
+            android:textSize="11sp"
+            android:maxLines="1" />
+
+        <Space
+            android:layout_width="18dp"
+            android:layout_height="1dp" />
 
         <TextView
             android:id="@+id/taskTag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxWidth="120dp"
+            android:gravity="end"
             android:textColor="#F6E9C9"
-            android:alpha=".74"
+            android:alpha=".70"
             android:textStyle="bold"
             android:textSize="11sp"
             android:maxLines="1"
             android:ellipsize="end" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/taskAction"
-        android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:gravity="center"
-        android:text="○  MARK COMPLETE"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="11sp"
-        android:letterSpacing=".08"
-        android:background="@drawable/widget_action" />
 </LinearLayout>
