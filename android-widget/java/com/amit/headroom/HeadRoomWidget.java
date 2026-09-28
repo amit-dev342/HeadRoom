@@ -15,11 +15,11 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 public class HeadRoomWidget extends AppWidgetProvider {
-    static final String ACTION_TOGGLE_TASK = "com.amit.headroom.ACTION_TOGGLE_TASK";
+    static final String ACTION_WIDGET_INTERACTION = "com.amit.headroom.ACTION_WIDGET_INTERACTION";
     static final String EXTRA_TASK_ID = "taskId";
     static final String EXTRA_INTERACTION = "interaction";
-    static final String INTERACTION_TOGGLE = "toggle";
     static final String INTERACTION_CARD_TAP = "cardTap";
+    static final String INTERACTION_ADD_TASK = "addTask";
 
     private static final int COMPACT_HEIGHT_DP = 150;
     private static final long DOUBLE_TAP_WINDOW_MS = 550L;
@@ -49,20 +49,20 @@ public class HeadRoomWidget extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
-        if (!ACTION_TOGGLE_TASK.equals(intent.getAction())) return;
-
-        long taskId = intent.getLongExtra(EXTRA_TASK_ID, -1L);
-        if (taskId < 0L) return;
+        if (!ACTION_WIDGET_INTERACTION.equals(intent.getAction())) return;
 
         String interaction = intent.getStringExtra(EXTRA_INTERACTION);
-        if (INTERACTION_CARD_TAP.equals(interaction) && !isDoubleTap(context, taskId)) {
+
+        if (INTERACTION_ADD_TASK.equals(interaction)) {
+            WidgetTaskStore.requestAddTask(context);
+            launchApp(context);
             return;
         }
 
-        if (!INTERACTION_TOGGLE.equals(interaction)
-                && !INTERACTION_CARD_TAP.equals(interaction)) {
-            return;
-        }
+        if (!INTERACTION_CARD_TAP.equals(interaction)) return;
+
+        long taskId = intent.getLongExtra(EXTRA_TASK_ID, -1L);
+        if (taskId < 0L || !isDoubleTap(context, taskId)) return;
 
         if (!WidgetTaskStore.toggle(context, taskId)) return;
         refreshData(context);
@@ -87,17 +87,17 @@ public class HeadRoomWidget extends AppWidgetProvider {
         views.setViewVisibility(R.id.widgetCounts, compact ? View.GONE : View.VISIBLE);
         views.setViewPadding(
                 R.id.widgetRoot,
-                dp(context, compact ? 6 : 10),
-                dp(context, compact ? 6 : 10),
-                dp(context, compact ? 6 : 10),
-                dp(context, compact ? 6 : 10)
+                dp(context, 4),
+                dp(context, 4),
+                dp(context, 4),
+                dp(context, 4)
         );
         views.setViewPadding(
                 R.id.widgetList,
-                compact ? 0 : dp(context, 2),
-                compact ? 0 : dp(context, 8),
-                compact ? 0 : dp(context, 2),
-                compact ? 0 : dp(context, 2)
+                0,
+                compact ? 0 : dp(context, 6),
+                0,
+                0
         );
 
         Intent serviceIntent = new Intent(context, HeadRoomWidgetService.class);
@@ -114,7 +114,7 @@ public class HeadRoomWidget extends AppWidgetProvider {
         views.setDisplayedChild(R.id.widgetList, 0);
 
         Intent interactionIntent = new Intent(context, HeadRoomWidget.class);
-        interactionIntent.setAction(ACTION_TOGGLE_TASK);
+        interactionIntent.setAction(ACTION_WIDGET_INTERACTION);
         PendingIntent interactionTemplate = PendingIntent.getBroadcast(
                 context,
                 widgetId,
@@ -192,6 +192,12 @@ public class HeadRoomWidget extends AppWidgetProvider {
         }
 
         return doubleTap;
+    }
+
+    private static void launchApp(Context context) {
+        Intent openIntent = new Intent(context, MainActivity.class);
+        openIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(openIntent);
     }
 
     private static int dp(Context context, int value) {

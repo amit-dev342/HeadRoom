@@ -9,6 +9,7 @@ final class WidgetTaskStore {
     private static final String PREFS_NAME = "HeadRoomWidget";
     private static final String TASKS_KEY = "tasks";
     private static final String UPDATED_AT_KEY = "updatedAt";
+    private static final String ADD_TASK_REQUEST_KEY = "addTaskRequest";
 
     private WidgetTaskStore() {}
 
@@ -55,6 +56,19 @@ final class WidgetTaskStore {
                 .putString(TASKS_KEY, validated.toString())
                 .putLong(UPDATED_AT_KEY, updatedAt)
                 .commit();
+    }
+
+    static void requestAddTask(Context context) {
+        preferences(context).edit().putBoolean(ADD_TASK_REQUEST_KEY, true).apply();
+    }
+
+    static boolean consumeAddTaskRequest(Context context) {
+        SharedPreferences preferences = preferences(context);
+        boolean requested = preferences.getBoolean(ADD_TASK_REQUEST_KEY, false);
+        if (requested) {
+            preferences.edit().remove(ADD_TASK_REQUEST_KEY).apply();
+        }
+        return requested;
     }
 
     static boolean toggle(Context context, long taskId) {

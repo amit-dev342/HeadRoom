@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 public class HeadRoomWidgetService extends RemoteViewsService {
     static final String EXTRA_COMPACT = "compact";
+    private static final int MAX_TASKS_BEFORE_ADD_CARD = 3;
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
@@ -45,18 +46,29 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
         @Override
         public int getCount() {
-            return tasks.length();
+            return tasks.length() + 1;
         }
 
         @Override
         public RemoteViews getViewAt(int position) {
-            if (position < 0 || position >= tasks.length()) return null;
+            int addPosition = addCardPosition();
+            if (position == addPosition) {
+                return buildAddTaskCard();
+            }
 
-            JSONObject task = tasks.optJSONObject(position);
+            int taskIndex = position < addPosition ? position : position - 1;
+            if (taskIndex < 0 || taskIndex >= tasks.length()) return null;
+
+            JSONObject task = tasks.optJSONObject(taskIndex);
             if (task == null) return null;
 
+            return buildTaskCard(task);
+        }
+
+        private RemoteViews buildTaskCard(JSONObject task) {
             boolean done = task.optBoolean("done", false);
             String priority = task.optString("priority", "medium");
+            long taskId = task.optLong("id", -1L);
 
             RemoteViews views = new RemoteViews(
                     context.getPackageName(),
@@ -78,17 +90,7 @@ public class HeadRoomWidgetService extends RemoteViewsService {
                     done ? Paint.STRIKE_THRU_TEXT_FLAG : 0
             );
 
-            long taskId = task.optLong("id", -1L);
-
-            if (compact) {
-                Intent cardTap = new Intent();
-                cardTap.putExtra(HeadRoomWidget.EXTRA_TASK_ID, taskId);
-                cardTap.putExtra(
-                        HeadRoomWidget.EXTRA_INTERACTION,
-                        HeadRoomWidget.INTERACTION_CARD_TAP
-                );
-                views.setOnClickFillInIntent(R.id.taskCard, cardTap);
-            } else {
+            if (!compact) {
                 String due = task.optString("due", "");
                 String tag = task.optString("tag", "").trim();
 
@@ -97,20 +99,31 @@ public class HeadRoomWidgetService extends RemoteViewsService {
                         R.id.taskTag,
                         tag.isEmpty() ? "UNTAGGED" : tag.toUpperCase(Locale.ROOT)
                 );
-                views.setTextViewText(
-                        R.id.taskAction,
-                        done ? "✓  MARK ACTIVE" : "○  MARK COMPLETE"
-                );
-
-                Intent action = new Intent();
-                action.putExtra(HeadRoomWidget.EXTRA_TASK_ID, taskId);
-                action.putExtra(
-                        HeadRoomWidget.EXTRA_INTERACTION,
-                        HeadRoomWidget.INTERACTION_TOGGLE
-                );
-                views.setOnClickFillInIntent(R.id.taskAction, action);
             }
 
+            Intent cardTap = new Intent();
+            cardTap.putExtra(HeadRoomWidget.EXTRA_TASK_ID, taskId);
+            cardTap.putExtra(
+                    HeadRoomWidget.EXTRA_INTERACTION,
+                    HeadRoomWidget.INTERACTION_CARD_TAP
+            );
+            views.setOnClickFillInIntent(R.id.taskCard, cardTap);
+
+            return views;
+        }
+
+        private RemoteViews buildAddTaskCard() {
+            RemoteViews views = new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.headroom_widget_add_task
+            );
+
+            Intent addTask = new Intent();
+            addTask.putExtra(
+                    HeadRoomWidget.EXTRA_INTERACTION,
+                    HeadRoomWidget.INTERACTION_ADD_TASK
+            );
+            views.setOnClickFillInIntent(R.id.addTaskCard, addTask);
             return views;
         }
 
@@ -121,12 +134,17 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
         @Override
         public int getViewTypeCount() {
-            return 2;
+            return 3;
         }
 
         @Override
         public long getItemId(int position) {
-            JSONObject task = tasks.optJSONObject(position);
+            if (position == addCardPosition()) {
+                return Long.MAX_VALUE;
+            }
+
+            int taskIndex = position < addCardPosition() ? position : position - 1;
+            JSONObject task = tasks.optJSONObject(taskIndex);
             return task == null ? position : task.optLong("id", position);
         }
 
@@ -137,6 +155,10 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
         private void reload() {
             tasks = WidgetTaskStore.readTasks(context);
+        }
+
+        private int addCardPosition() {
+            return Math.min(MAX_TASKS_BEFORE_ADD_CARD, tasks.length());
         }
 
         private int backgroundFor(boolean done, String priority) {
