@@ -1,60 +1,147 @@
 package com.amit.headroom;
-import android.content.*;import android.widget.*;import org.json.*;import java.io.BufferedReader;import java.text.*;import java.util.*;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Paint;
+import android.widget.RemoteViews;
+import android.widget.RemoteViewsService;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class HeadRoomWidgetService extends RemoteViewsService {
- public RemoteViewsFactory onGetViewFactory(Intent i){return new Factory(getApplicationContext());}
- static class Factory implements RemoteViewsFactory {
-  final Context c; JSONArray tasks=new JSONArray();
-  Factory(Context c){this.c=c;}
-  public void onCreate(){reload();}
-  private void reload(){try{tasks=new JSONArray(c.getSharedPreferences("HeadRoomWidget",Context.MODE_PRIVATE).getString("tasks","[]"));}catch(Exception e){tasks=new JSONArray();}}
-  public void onDataSetChanged(){reload();}
-  public void onDestroy(){}
-  public int getCount(){return tasks.length()==0?1:tasks.length();}
-  public RemoteViews getViewAt(int p){
-   try{
-    RemoteViews v=new RemoteViews(c.getPackageName(),R.layout.headroom_widget_task);
-    if(tasks.length()==0){v.setTextViewText(R.id.taskStatus,"DAILY NOTE");v.setTextViewText(R.id.taskPriority,"HEADROOM");v.setTextViewText(R.id.taskTitle,dailyQuote());v.setTextViewText(R.id.taskWeek,"Make space. Move forward.");v.setTextViewText(R.id.taskDue,"");v.setTextViewText(R.id.taskTag,"");v.setTextViewText(R.id.taskNotes,"");v.setTextViewText(R.id.taskAction,"ADD A TASK IN HEADROOM");return v;}
-    JSONObject t=tasks.getJSONObject(p);boolean done=t.optBoolean("done");String priority=t.optString("priority","medium");
-    v.setInt(R.id.taskTitle,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskStatus,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskAction,"setBackgroundResource",R.drawable.widget_action);
-    v.setInt(R.id.taskTitle,"setTextColor",android.graphics.Color.WHITE);
-    int bg=done?R.drawable.widget_card_done:priority.equals("high")?R.drawable.widget_card_high:priority.equals("low")?R.drawable.widget_card_low:R.drawable.widget_card;
-    v.setInt(R.id.taskAction,"setTextColor",android.graphics.Color.WHITE);v.setInt(R.id.taskTitle,"setTextColor",android.graphics.Color.WHITE);
-    v.setInt(R.id.taskStatus,"setTextColor",android.graphics.Color.WHITE);
-    v.setTextViewText(R.id.taskStatus,done?"COMPLETED":"ACTIVE");v.setTextViewText(R.id.taskPriority,priority.toUpperCase(Locale.ROOT)+" PRIORITY");v.setTextViewText(R.id.taskTitle,t.optString("text"));
-    String due=t.optString("due");v.setTextViewText(R.id.taskWeek,weekLabel(due));v.setTextViewText(R.id.taskDue,dueLabel(due));String tag=t.optString("tag").trim();v.setTextViewText(R.id.taskTag,tag.isEmpty()?"UNTAGGED":tag.toUpperCase(Locale.ROOT));String notes=t.optString("notes").trim();v.setTextViewText(R.id.taskNotes,notes.isEmpty()?"No notes":notes);v.setTextViewText(R.id.taskAction,done?"✓  MARK ACTIVE":"○  MARK COMPLETE");
-    v.setInt(R.id.taskAction,"setBackgroundResource",R.drawable.widget_action);v.setInt(R.id.taskTitle,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskNotes,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskWeek,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskDue,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskTag,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskPriority,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskStatus,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskAction,"setBackgroundResource",R.drawable.widget_action);
-    v.setInt(R.id.taskTitle,"setTextColor",android.graphics.Color.WHITE);
-    v.setInt(R.id.taskStatus,"setTextColor",android.graphics.Color.WHITE);
-    v.setInt(R.id.taskPriority,"setTextColor",android.graphics.Color.WHITE);
-    v.setInt(R.id.taskDue,"setTextColor",android.graphics.Color.WHITE);
-    v.setInt(R.id.taskTag,"setTextColor",android.graphics.Color.WHITE);
-    v.setInt(R.id.taskAction,"setTextColor",android.graphics.Color.WHITE);
-    v.setInt(R.id.taskNotes,"setTextColor",0xFFF8F4E8);v.setInt(R.id.taskWeek,"setTextColor",0xFFF8F4E8);
-    v.setInt(R.id.taskAction,"setBackgroundResource",R.drawable.widget_action);
-    v.setInt(R.id.taskTitle,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskStatus,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskPriority,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskWeek,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskDue,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskTag,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskNotes,"setBackgroundResource",android.R.color.transparent);
-    v.setInt(R.id.taskAction,"setBackgroundResource",R.drawable.widget_action);
-    return applyCardBackground(v,bg);
-   }catch(Exception e){return null;}
-  }
-  private RemoteViews applyCardBackground(RemoteViews v,int bg){v.setInt(R.id.taskCard,"setBackgroundResource",bg);v.setInt(R.id.taskAction,"setBackgroundResource",R.drawable.widget_action);return v;}
-  private String dueLabel(String due){if(due.isEmpty())return "NO DUE DATE";try{Date d=new SimpleDateFormat("yyyy-MM-dd",Locale.US).parse(due);return new SimpleDateFormat("EEE, d MMM",Locale.US).format(d);}catch(Exception e){return due;}}
-  private String weekLabel(String due){if(due.isEmpty())return "No scheduled week";try{SimpleDateFormat iso=new SimpleDateFormat("yyyy-MM-dd",Locale.US);Date d=iso.parse(due);Calendar cal=Calendar.getInstance();cal.setTime(d);int day=(cal.get(Calendar.DAY_OF_WEEK)+5)%7;cal.add(Calendar.DATE,-day);Date start=cal.getTime();cal.add(Calendar.DATE,6);Date end=cal.getTime();return new SimpleDateFormat("d MMM",Locale.US).format(start)+" – "+new SimpleDateFormat("d MMM yyyy",Locale.US).format(end);}catch(Exception e){return "";}}
-  private String dailyQuote(){try{BufferedReader r=new BufferedReader(new java.io.InputStreamReader(c.getResources().openRawResource(R.raw.motivational_quotes)));ArrayList<String> q=new ArrayList<>();String line;while((line=r.readLine())!=null)if(!line.trim().isEmpty())q.add(line);int day=Calendar.getInstance().get(Calendar.DAY_OF_YEAR);return q.get((day-1)%q.size());}catch(Exception e){return "Make room for what matters.";}}
-  public RemoteViews getLoadingView(){return null;}public int getViewTypeCount(){return 1;}public long getItemId(int p){return p;}public boolean hasStableIds(){return true;}
- }
+    @Override
+    public RemoteViewsFactory onGetViewFactory(Intent intent) {
+        return new Factory(getApplicationContext());
+    }
+
+    private static final class Factory implements RemoteViewsFactory {
+        private final Context context;
+        private JSONArray tasks = new JSONArray();
+
+        Factory(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public void onCreate() {
+            reload();
+        }
+
+        @Override
+        public void onDataSetChanged() {
+            reload();
+        }
+
+        @Override
+        public void onDestroy() {}
+
+        @Override
+        public int getCount() {
+            return tasks.length();
+        }
+
+        @Override
+        public RemoteViews getViewAt(int position) {
+            if (position < 0 || position >= tasks.length()) return null;
+
+            JSONObject task = tasks.optJSONObject(position);
+            if (task == null) return null;
+
+            boolean done = task.optBoolean("done", false);
+            String priority = task.optString("priority", "medium");
+            String due = task.optString("due", "");
+            String tag = task.optString("tag", "").trim();
+            String notes = task.optString("notes", "").trim();
+
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.headroom_widget_task);
+            views.setInt(R.id.taskCard, "setBackgroundResource", backgroundFor(done, priority));
+            views.setTextViewText(R.id.taskStatus, done ? "COMPLETED" : "ACTIVE");
+            views.setTextViewText(R.id.taskPriority, priority.toUpperCase(Locale.ROOT) + " PRIORITY");
+            views.setTextViewText(R.id.taskTitle, task.optString("text", ""));
+            views.setTextViewText(R.id.taskWeek, weekLabel(due));
+            views.setTextViewText(R.id.taskDue, dueLabel(due));
+            views.setTextViewText(R.id.taskTag, tag.isEmpty() ? "UNTAGGED" : tag.toUpperCase(Locale.ROOT));
+            views.setTextViewText(R.id.taskNotes, notes.isEmpty() ? "No notes" : notes);
+            views.setTextViewText(R.id.taskAction, done ? "✓  MARK ACTIVE" : "○  MARK COMPLETE");
+            views.setInt(
+                    R.id.taskTitle,
+                    "setPaintFlags",
+                    done ? Paint.STRIKE_THRU_TEXT_FLAG : 0
+            );
+
+            Intent action = new Intent();
+            action.putExtra(HeadRoomWidget.EXTRA_TASK_ID, task.optLong("id", -1L));
+            views.setOnClickFillInIntent(R.id.taskAction, action);
+
+            return views;
+        }
+
+        @Override
+        public RemoteViews getLoadingView() {
+            return null;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 1;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            JSONObject task = tasks.optJSONObject(position);
+            return task == null ? position : task.optLong("id", position);
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        private void reload() {
+            tasks = WidgetTaskStore.readTasks(context);
+        }
+
+        private int backgroundFor(boolean done, String priority) {
+            if (done) return R.drawable.widget_card_done;
+            if ("high".equals(priority)) return R.drawable.widget_card_high;
+            if ("low".equals(priority)) return R.drawable.widget_card_low;
+            return R.drawable.widget_card;
+        }
+
+        private String dueLabel(String due) {
+            if (due.isEmpty()) return "NO DUE DATE";
+            try {
+                Date parsed = new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(due);
+                return new SimpleDateFormat("EEE, d MMM", Locale.US).format(parsed);
+            } catch (Exception ignored) {
+                return due;
+            }
+        }
+
+        private String weekLabel(String due) {
+            if (due.isEmpty()) return "No scheduled week";
+            try {
+                Date parsed = new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(due);
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(parsed);
+
+                int dayOffset = (calendar.get(Calendar.DAY_OF_WEEK) + 5) % 7;
+                calendar.add(Calendar.DATE, -dayOffset);
+                Date start = calendar.getTime();
+
+                calendar.add(Calendar.DATE, 6);
+                Date end = calendar.getTime();
+
+                return new SimpleDateFormat("d MMM", Locale.US).format(start)
+                        + " – "
+                        + new SimpleDateFormat("d MMM yyyy", Locale.US).format(end);
+            } catch (Exception ignored) {
+                return "";
+            }
+        }
+    }
 }
