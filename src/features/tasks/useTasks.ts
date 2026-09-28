@@ -61,6 +61,8 @@ export function useTasks() {
 
       if (native && native.updatedAt > local.updatedAt) {
         applySnapshot(native);
+      } else if (!native || local.updatedAt > native.updatedAt) {
+        await pushWidgetSnapshot(local);
       }
     }
 

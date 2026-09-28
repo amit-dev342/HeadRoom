@@ -32,7 +32,8 @@ final class WidgetTaskStore {
         JSONArray tasks = readTasks(context);
         int count = 0;
         for (int i = 0; i < tasks.length(); i++) {
-            if (!tasks.optJSONObject(i).optBoolean("done", false)) count++;
+            JSONObject task = tasks.optJSONObject(i);
+            if (task != null && !task.optBoolean("done", false)) count++;
         }
         return count;
     }
@@ -41,7 +42,8 @@ final class WidgetTaskStore {
         JSONArray tasks = readTasks(context);
         int count = 0;
         for (int i = 0; i < tasks.length(); i++) {
-            if (tasks.optJSONObject(i).optBoolean("done", false)) count++;
+            JSONObject task = tasks.optJSONObject(i);
+            if (task != null && task.optBoolean("done", false)) count++;
         }
         return count;
     }
