@@ -86,6 +86,13 @@ public class HeadRoomWidget extends AppWidgetProvider {
         views.setViewVisibility(R.id.widgetHeader, compact ? View.GONE : View.VISIBLE);
         views.setViewVisibility(R.id.widgetCounts, compact ? View.GONE : View.VISIBLE);
         views.setViewPadding(
+                R.id.widgetRoot,
+                dp(context, compact ? 6 : 10),
+                dp(context, compact ? 6 : 10),
+                dp(context, compact ? 6 : 10),
+                dp(context, compact ? 6 : 10)
+        );
+        views.setViewPadding(
                 R.id.widgetList,
                 compact ? 0 : dp(context, 2),
                 compact ? 0 : dp(context, 8),
