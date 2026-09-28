@@ -2,6 +2,8 @@
     android:id="@+id/taskCard"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:minWidth="300dp"
+    android:minHeight="160dp"
     android:orientation="vertical"
     android:paddingStart="24dp"
     android:paddingTop="20dp"
@@ -66,17 +68,15 @@
             android:alpha=".70"
             android:textStyle="bold"
             android:textSize="11sp"
-            android:maxLines="1" />
-
-        <Space
-            android:layout_width="18dp"
-            android:layout_height="1dp" />
+            android:maxLines="1"
+            android:paddingEnd="12dp" />
 
         <TextView
             android:id="@+id/taskTag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxWidth="120dp"
+            android:paddingStart="12dp"
             android:gravity="end"
             android:textColor="#F6E9C9"
             android:alpha=".70"
