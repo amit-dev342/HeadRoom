@@ -37,18 +37,10 @@ public class HeadRoomWidget extends AppWidgetProvider {
         ComponentName provider = new ComponentName(context, HeadRoomWidget.class);
         int[] widgetIds = manager.getAppWidgetIds(provider);
 
-        manager.notifyAppWidgetViewDataChanged(widgetIds, R.id.widgetList);
-
-        int active = WidgetTaskStore.activeCount(context);
-        int completed = WidgetTaskStore.completedCount(context);
         for (int widgetId : widgetIds) {
-            RemoteViews partial = new RemoteViews(context.getPackageName(), R.layout.headroom_widget);
-            partial.setTextViewText(
-                    R.id.widgetCounts,
-                    active + " active • " + completed + " completed"
-            );
-            manager.partiallyUpdateAppWidget(widgetId, partial);
+            update(context, manager, widgetId);
         }
+        manager.notifyAppWidgetViewDataChanged(widgetIds, R.id.widgetList);
     }
 
     static void update(Context context, AppWidgetManager manager, int widgetId) {
@@ -56,9 +48,11 @@ public class HeadRoomWidget extends AppWidgetProvider {
 
         Intent serviceIntent = new Intent(context, HeadRoomWidgetService.class);
         serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
+        serviceIntent.putExtra("snapshotUpdatedAt", WidgetTaskStore.readUpdatedAt(context));
         serviceIntent.setData(Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME)));
         views.setRemoteAdapter(R.id.widgetList, serviceIntent);
         views.setEmptyView(R.id.widgetList, R.id.widgetEmpty);
+        views.setDisplayedChild(R.id.widgetList, 0);
 
         Intent toggleIntent = new Intent(context, HeadRoomWidget.class);
         toggleIntent.setAction(ACTION_TOGGLE_TASK);
