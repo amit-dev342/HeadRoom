@@ -12,6 +12,7 @@ import {
 import {
   groupTasksByTag,
   groupTasksByWeek,
+  splitMissedTasks,
   weekLabel,
 } from "@/features/tasks/taskUtils";
 import type {
@@ -70,8 +71,12 @@ export default function HeadRoom() {
   }, []);
 
 
-  const weekGroups = useMemo(() => groupTasksByWeek(tasks), [tasks]);
-  const tagGroups = useMemo(() => groupTasksByTag(tasks), [tasks]);
+  const { current: currentTasks, missed: missedTasks } = useMemo(
+    () => splitMissedTasks(tasks),
+    [tasks],
+  );
+  const weekGroups = useMemo(() => groupTasksByWeek(currentTasks), [currentTasks]);
+  const tagGroups = useMemo(() => groupTasksByTag(currentTasks), [currentTasks]);
   const activeCount = tasks.filter((task) => !task.done).length;
 
   function openNewTask() {
@@ -181,6 +186,24 @@ export default function HeadRoom() {
                   </TaskSection>
                 );
               })}
+
+          {missedTasks.length > 0 && (
+            <TaskSection
+              label="Missed"
+              count={missedTasks.length}
+              collapsed={Boolean(collapsed.missed)}
+              onToggle={() => toggleSection("missed")}
+            >
+              {missedTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onToggle={toggleTask}
+                  onEdit={openEditTask}
+                />
+              ))}
+            </TaskSection>
+          )}
         </div>
       )}
 
