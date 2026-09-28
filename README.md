@@ -1,6 +1,6 @@
 # HeadRoom
 
-A local-first task manager rebuilt in Next.js + TypeScript from the ColorTodo PR #10 feature set.
+A local-first task manager built with Next.js + TypeScript and packaged for Android with Capacitor.
 
 ## Features
 - Local-only task persistence
@@ -12,17 +12,16 @@ A local-first task manager rebuilt in Next.js + TypeScript from the ColorTodo PR
 - Compact / Default / Expanded task sizes
 - Card / List / Board layouts
 - Mobile-first dark layered UI
-- Static export configured for Capacitor Android packaging
+- Native Android home-screen widget bridge
+- GitHub Actions debug APK build
 
-## Run
+## Web development
 ```bash
 npm install
 npm run dev
 ```
 
-## Build
-```bash
-npm run build
-```
+## Android APK
+Every push to `main` runs **Build HeadRoom APK**. Open the GitHub Actions run, download the **HeadRoom-APK** artifact, unzip it, and install `app-debug.apk` on Android.
 
-The exported web application is written to `out/` and can be packaged with Capacitor.
+The workflow builds the Next.js static export, generates the Capacitor Android shell, installs the native widget sources, and runs Gradle `assembleDebug`.
