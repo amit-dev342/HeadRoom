@@ -29,17 +29,25 @@ public class HeadRoomWidget extends AppWidgetProvider {
         long taskId = intent.getLongExtra(EXTRA_TASK_ID, -1L);
         if (taskId < 0L || !WidgetTaskStore.toggle(context, taskId)) return;
 
-        refreshAll(context);
+        refreshData(context);
     }
 
-    static void refreshAll(Context context) {
+    static void refreshData(Context context) {
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         ComponentName provider = new ComponentName(context, HeadRoomWidget.class);
         int[] widgetIds = manager.getAppWidgetIds(provider);
 
         manager.notifyAppWidgetViewDataChanged(widgetIds, R.id.widgetList);
+
+        int active = WidgetTaskStore.activeCount(context);
+        int completed = WidgetTaskStore.completedCount(context);
         for (int widgetId : widgetIds) {
-            update(context, manager, widgetId);
+            RemoteViews partial = new RemoteViews(context.getPackageName(), R.layout.headroom_widget);
+            partial.setTextViewText(
+                    R.id.widgetCounts,
+                    active + " active • " + completed + " completed"
+            );
+            manager.partiallyUpdateAppWidget(widgetId, partial);
         }
     }
 
@@ -64,7 +72,10 @@ public class HeadRoomWidget extends AppWidgetProvider {
 
         int active = WidgetTaskStore.activeCount(context);
         int completed = WidgetTaskStore.completedCount(context);
-        views.setTextViewText(R.id.widgetCounts, active + " active • " + completed + " completed");
+        views.setTextViewText(
+                R.id.widgetCounts,
+                active + " active • " + completed + " completed"
+        );
 
         Intent openIntent = new Intent(context, MainActivity.class);
         PendingIntent openApp = PendingIntent.getActivity(
