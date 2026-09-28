@@ -88,9 +88,9 @@ public class HeadRoomWidget extends AppWidgetProvider {
         views.setViewPadding(
                 R.id.widgetRoot,
                 dp(context, 4),
-                dp(context, compact ? 4 : 8),
-                dp(context, compact ? 4 : 8),
-                dp(context, compact ? 4 : 8)
+                dp(context, 4),
+                dp(context, 4),
+                dp(context, 4)
         );
         views.setViewPadding(
                 R.id.widgetList,
