@@ -13,26 +13,31 @@ import org.json.JSONObject;
 
 public class HeadRoomWidgetService extends RemoteViewsService {
     static final String EXTRA_DISPLAY_MODE = "displayMode";
-    static final int MODE_COMPACT = 0;
+    static final String EXTRA_COMPACT = "compact";
+    static final int MODE_COMPACT_TITLE = 0;
     static final int MODE_TITLE_ONLY = 1;
-    static final int MODE_DETAILED = 2;
+    static final int MODE_SUMMARY = 2;
+    static final int MODE_DETAILED = 3;
 
     private static final int MAX_TASKS_BEFORE_ADD_CARD = 3;
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
         int displayMode = intent.getIntExtra(EXTRA_DISPLAY_MODE, MODE_DETAILED);
-        return new Factory(getApplicationContext(), displayMode);
+        boolean compact = intent.getBooleanExtra(EXTRA_COMPACT, false);
+        return new Factory(getApplicationContext(), displayMode, compact);
     }
 
     private static final class Factory implements RemoteViewsFactory {
         private final Context context;
         private final int displayMode;
+        private final boolean compact;
         private JSONArray tasks = new JSONArray();
 
-        Factory(Context context, int displayMode) {
+        Factory(Context context, int displayMode, boolean compact) {
             this.context = context;
             this.displayMode = displayMode;
+            this.compact = compact;
         }
 
         @Override
@@ -81,13 +86,14 @@ public class HeadRoomWidgetService extends RemoteViewsService {
 
             views.setInt(R.id.taskCard, "setBackgroundResource", backgroundFor(done, priority));
 
-            if (displayMode == MODE_COMPACT) {
+            if (displayMode == MODE_COMPACT_TITLE || displayMode == MODE_TITLE_ONLY) {
+                setTaskTitle(views, task, done);
+            } else if (displayMode == MODE_SUMMARY) {
                 views.setTextViewText(R.id.taskStatus, done ? "COMPLETED" : "ACTIVE");
                 views.setTextViewText(
                         R.id.taskPriority,
                         priority.toUpperCase(Locale.ROOT) + " PRIORITY"
                 );
-            } else if (displayMode == MODE_TITLE_ONLY) {
                 setTaskTitle(views, task, done);
             } else {
                 views.setTextViewText(R.id.taskStatus, done ? "COMPLETED" : "ACTIVE");
@@ -128,11 +134,14 @@ public class HeadRoomWidgetService extends RemoteViewsService {
         }
 
         private int taskLayout() {
-            if (displayMode == MODE_COMPACT) {
+            if (displayMode == MODE_COMPACT_TITLE) {
                 return R.layout.headroom_widget_task_compact;
             }
             if (displayMode == MODE_TITLE_ONLY) {
                 return R.layout.headroom_widget_task_title_only;
+            }
+            if (displayMode == MODE_SUMMARY) {
+                return R.layout.headroom_widget_task_summary;
             }
             return R.layout.headroom_widget_task;
         }
@@ -140,7 +149,7 @@ public class HeadRoomWidgetService extends RemoteViewsService {
         private RemoteViews buildAddTaskCard() {
             RemoteViews views = new RemoteViews(
                     context.getPackageName(),
-                    displayMode == MODE_COMPACT
+                    compact
                             ? R.layout.headroom_widget_add_task_compact
                             : R.layout.headroom_widget_add_task
             );
